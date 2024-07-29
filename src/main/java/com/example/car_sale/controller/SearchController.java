@@ -25,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchController {
     private final SiteService   siteService;
-    private final SearchService searchService;
 
     @GetMapping("/{carId}")
     public String getCarDetails(@PathVariable Long carId, Model model) throws IOException {
