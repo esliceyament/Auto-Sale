@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Car List</title>
+    <!-- Add your CSS and other head elements here -->
+</head>
+<body>
+<div class="car-list">
+    <div th:each="car : ${cars.content}" class="car-item">
+        <a th:href="@{/cars/details/{id}(id=${car.id})}">
+            <!-- Display the first image if available -->
+            <img th:if="${car.images.size() > 0}" th:src="'data:image/jpeg;base64,' + ${car.images[0].image}" alt="Car Image"/>
+            <p th:unless="${car.images.size() > 0}">No image available</p>
+        </a>
+        <p>
+            <strong th:text="${car.make}"></strong> -
+            <span th:text="${car.model}"></span>,
+            <span th:text="${car.year}"></span>
+        </p>
+    </div>
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination">
+    <a th:href="@{/search(page=${page - 1}, size=${size})}" th:if="${page > 1}">Previous</a>
+    <a th:href="@{/search(page=${page + 1}, size=${size})}" th:if="${page < totalPages}">Next</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Car Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            color: #004d99;
+            border-bottom: 2px solid #004d99;
+            padding-bottom: 10px;
+        }
+
+        .car-details {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .car-details h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .car-details p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .car-details span {
+            font-weight: bold;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .images img {
+            max-width: 200px;
+            max-height: 150px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .images img:hover {
+            border-color: #004d99;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            margin: 15% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border: none;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>Car Details</h1>
+
+<!-- Display car details -->
+<div class="car-details">
+    <h2 th:text="${carDetailResponse.car.make} + ' ' + ${carDetailResponse.car.model}"></h2>
+    <p>Year: <span th:text="${carDetailResponse.car.year}"></span></p>
+    <p>VIN: <span th:text="${carDetailResponse.car.vin}"></span></p>
+    <p>Color: <span th:text="${carDetailResponse.car.filters.colour}"></span></p>
+    <p>Odometer: <span th:text="${carDetailResponse.car.filters.odometer}"></span></p>
+    <p>Engine Type: <span th:text="${carDetailResponse.car.filters.engineType}"></span></p>
+    <p>Fuel Type: <span th:text="${carDetailResponse.car.filters.fuelType}"></span></p>
+    <p>City: <span th:text="${carDetailResponse.car.filters.city}"></span></p>
+    <!-- Add more car details as needed -->
+</div>
+
+<!-- Display images -->
+<h2>Images</h2>
+<div class="images" th:each="image : ${carDetailResponse.images}">
+    <img th:src="'data:image/jpeg;base64,' + ${image}" alt="Car Image" onclick="openModal(this)" />
+</div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="modal-content">
+        <img id="modalImg" />
+    </div>
+</div>
+
+<script>
+    function openModal(img) {
+        var modal = document.getElementById('myModal');
+        var modalImg = document.getElementById('modalImg');
+        modal.style.display = 'block';
+        modalImg.src = img.src;
+    }
+
+    function closeModal() {
+        var modal = document.getElementById('myModal');
+        modal.style.display = 'none';
+    }
+
+    // Close the modal when clicking anywhere outside the modal
+    window.onclick = function(event) {
+        var modal = document.getElementById('myModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
