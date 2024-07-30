@@ -8,6 +8,7 @@ import com.example.car_sale.enums.City;
 import com.example.car_sale.enums.Colour;
 import com.example.car_sale.enums.FuelType;
 import com.example.car_sale.response.CarDetailResponse;
+import com.example.car_sale.service.SearchService;
 import com.example.car_sale.service.SiteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,13 +25,14 @@ import java.util.List;
 @RequestMapping("/autos")
 @RequiredArgsConstructor
 public class SearchController {
-    private final SiteService   siteService;
+    private final SiteService siteService;
+    private final SearchService searchService;
 
     @GetMapping("/{carId}")
     public String getCarDetails(@PathVariable Long carId, Model model) throws IOException {
         CarDetailResponse carDetailResponse = siteService.getCarDetails(carId);
         model.addAttribute("carDetailResponse", carDetailResponse);
-        return "car-details"; // Return the view name (Thymeleaf template)
+        return "car-details";
     }
 
     @GetMapping("/search")
@@ -71,11 +73,16 @@ public class SearchController {
 
         PageDto<CarDto> result = searchService.getCarsSearch(criteria, page, size);
 
-        model1.addAttribute("cars", result);
+        model1.addAttribute("cars", result.getContent()); // Ensure you pass the list of CarDto
+        model1.addAttribute("fuelTypes", FuelType.values());
+        model1.addAttribute("cities", City.values());
+        model1.addAttribute("colours", Colour.values());
+        model1.addAttribute("bans", Ban.values());
         model1.addAttribute("page", page);
         model1.addAttribute("size", size);
-        model1.addAttribute("totalPages", (result.getTotalElements() + result.getSize() - 1) / result.getSize());
+        model1.addAttribute("totalPages", (result.getTotalElements() + size - 1) / size);
 
         return "car-list";
     }
+
 }

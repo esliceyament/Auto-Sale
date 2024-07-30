@@ -1,30 +1,216 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
     <title>Car List</title>
-    <!-- Add your CSS and other head elements here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .search-form {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .search-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .search-form input, .search-form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .search-form button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-form button:hover {
+            background-color: #c0392b;
+        }
+        .car-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .car-item {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: calc(25% - 20px);
+            box-sizing: border-box;
+        }
+        .car-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .car-item p {
+            padding: 10px;
+            margin: 0;
+        }
+        .car-item a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .pagination {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .pagination a {
+            display: inline-block;
+            margin: 0 5px;
+            padding: 10px 15px;
+            color: #fff;
+            background-color: #e74c3c;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .pagination a:hover {
+            background-color: #c0392b;
+        }
+        .pagination a.disabled {
+            background-color: #ddd;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<div class="car-list">
-    <div th:each="car : ${cars.content}" class="car-item">
-        <a th:href="@{/cars/details/{id}(id=${car.id})}">
-            <!-- Display the first image if available -->
-            <img th:if="${car.images.size() > 0}" th:src="'data:image/jpeg;base64,' + ${car.images[0].image}" alt="Car Image"/>
-            <p th:unless="${car.images.size() > 0}">No image available</p>
-        </a>
-        <p>
-            <strong th:text="${car.make}"></strong> -
-            <span th:text="${car.model}"></span>,
-            <span th:text="${car.year}"></span>
-        </p>
+<header>
+    <h1>Car Listing</h1>
+</header>
+<div class="container">
+    <!-- Search Form -->
+    <div class="search-form">
+        <form th:action="@{/autos/search}" method="get">
+            <label for="make">Make:</label>
+            <input type="text" id="make" name="make" placeholder="Enter car make" th:value="${make}" />
+
+            <label for="model">Model:</label>
+            <input type="text" id="model" name="model" placeholder="Enter car model" th:value="${model}" />
+
+            <label for="startYear">Start Year:</label>
+            <input type="number" id="startYear" name="startYear" placeholder="Enter start year" th:value="${startYear}" />
+
+            <label for="lastYear">Last Year:</label>
+            <input type="number" id="lastYear" name="lastYear" placeholder="Enter last year" th:value="${lastYear}" />
+
+            <label for="minPrice">Min Price:</label>
+            <input type="number" step="0.01" id="minPrice" name="minPrice" placeholder="Enter min price" th:value="${minPrice}" />
+
+            <label for="maxPrice">Max Price:</label>
+            <input type="number" step="0.01" id="maxPrice" name="maxPrice" placeholder="Enter max price" th:value="${maxPrice}" />
+
+
+            <button type="button" onclick="toggleFilters()">Filters</button>
+
+            <!-- Extra Filters (Initially Hidden) -->
+            <div id="extraFilters" class="hidden">
+
+                <label for="fuelType">Fuel Type:</label>
+                <select id="fuelType" name="fuelType">
+                    <option value="" th:selected="${fuelType == null}">Select fuel type</option>
+                    <option th:each="type : ${fuelTypes}" th:value="${type}" th:text="${type.displayName}" th:selected="${type == fuelType}"></option>
+                </select>
+
+                <label for="colour">Colour:</label>
+                <select id="colour" name="colour">
+                    <option value="" th:selected="${colour == null}">Select colour</option>
+                    <option th:each="colour : ${colours}" th:value="${colour}" th:text="${colour.displayName}" th:selected="${type == colour}"></option>
+                </select>
+
+                <label for="ban">Ban:</label>
+                <select id="ban" name="ban">
+                    <option value="" th:selected="${ban == null}">Select ban</option>
+                    <option th:each="ban : ${bans}" th:value="${ban}" th:text="${ban.displayName}" th:selected="${type == ban}"></option>
+                </select>
+
+                <label for="city">City:</label>
+                <select id="city" name="city">
+                    <option value="" th:selected="${city == null}">Select city</option>
+                    <option th:each="city : ${cities}" th:value="${city}" th:text="${city.displayName}" th:selected="${type == city}"></option>
+                </select>
+
+                <label for="minOdometer">Min Odometer:</label>
+                <input type="number" step="0.01" id="minOdometer" name="minOdometer" placeholder="Enter min odometer" th:value="${minOdometer}" />
+
+                <label for="maxOdometer">Max Odometer:</label>
+                <input type="number" step="0.01" id="maxOdometer" name="maxOdometer" placeholder="Enter max odometer" th:value="${maxOdometer}" />
+
+                <label for="minEngineType">Min Engine Type:</label>
+                <input type="number" id="minEngineType" name="minEngineType" placeholder="Enter min engine type" th:value="${minEngineType}" />
+
+                <label for="maxEngineType">Max Engine Type:</label>
+                <input type="number" id="maxEngineType" name="maxEngineType" placeholder="Enter max engine type" th:value="${maxEngineType}" />
+
+            </div>
+
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <!-- Displaying the list of cars -->
+    <div class="car-list">
+        <div th:each="car : ${cars}" class="car-item">
+            <a th:href="@{/autos/{carId}(carId=${car.id})}">
+                <!-- Display the first image if available -->
+                <img th:if="${car.firstImage != null}" th:src="'data:image/jpeg;base64,' + ${car.firstImage}" alt="Car Image"/>
+                <p th:unless="${car.firstImage != null}">No image available</p>
+            </a>
+            <p>
+                <strong th:text="${car.make}"></strong> -
+                <span th:text="${car.model}"></span>,
+                <span th:text="${car.year}"></span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <a th:href="@{/autos/search(page=${page - 1}, size=${size}, make=${make}, model=${model}, startYear=${startYear}, lastYear=${lastYear}, minPrice=${minPrice}, maxPrice=${maxPrice}, minOdometer=${minOdometer}, maxOdometer=${maxOdometer}, minEngineType=${minEngineType}, maxEngineType=${maxEngineType}, fuelType=${fuelType}, colour=${colour}, ban=${ban}, city=${city})}" th:if="${page > 1}" class="enabled">Previous</a>
+        <a th:href="@{/autos/search(page=${page + 1}, size=${size}, make=${make}, model=${model}, startYear=${startYear}, lastYear=${lastYear}, minPrice=${minPrice}, maxPrice=${maxPrice}, minOdometer=${minOdometer}, maxOdometer=${maxOdometer}, minEngineType=${minEngineType}, maxEngineType=${maxEngineType}, fuelType=${fuelType}, colour=${colour}, ban=${ban}, city=${city})}" th:if="${page < totalPages}" class="enabled">Next</a>
+        <a th:classappend="${page == 1 ? 'disabled' : ''}" th:if="${page <= 1}" class="disabled">Previous</a>
+        <a th:classappend="${page == totalPages ? 'disabled' : ''}" th:if="${page >= totalPages}" class="disabled">Next</a>
     </div>
 </div>
-
-<!-- Pagination Controls -->
-<div class="pagination">
-    <a th:href="@{/search(page=${page - 1}, size=${size})}" th:if="${page > 1}">Previous</a>
-    <a th:href="@{/search(page=${page + 1}, size=${size})}" th:if="${page < totalPages}">Next</a>
-</div>
+<script>
+    function toggleFilters() {
+        var extraFilters = document.getElementById('extraFilters');
+        if (extraFilters.style.display === 'none' || extraFilters.style.display === '') {
+            extraFilters.style.display = 'block';
+        } else {
+            extraFilters.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>

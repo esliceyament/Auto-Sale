@@ -5,7 +5,11 @@ import lombok.Data;
 @Data
 public class ImagesResponse {
 
-    private String image;
+    private Long id;
+    private String fileName;
+    private String filePath;
+    private String fileType;
+    private Long carId;
 
 }
 

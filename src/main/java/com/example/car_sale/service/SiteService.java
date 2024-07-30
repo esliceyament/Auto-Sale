@@ -64,14 +64,12 @@ public class SiteService {
 
 
     public CarDetailResponse getCarDetails(Long carId) throws IOException {
-        // Fetch the car
+
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new NotFoundException("Car with ID " + carId + " wasn't found!"));
 
-        // Convert Car entity to CarDto
         CarDto carDto = carMapper.toDto(car);
 
-        // Fetch and read images
         List<Images> images = car.getImages();
         List<String> imageContents = images.stream()
                 .map(image -> {
@@ -85,7 +83,6 @@ public class SiteService {
                 })
                 .collect(Collectors.toList());
 
-        // Return a new CarDetailResponse with the car details and Base64 encoded image content
         return new CarDetailResponse(carDto, imageContents);
     }
 }

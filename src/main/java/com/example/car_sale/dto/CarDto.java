@@ -17,8 +17,12 @@ public class CarDto {
     private String vin;
     private Double price;
 
+
+    private String firstImage;
+
+
     private CarFilterDto filters;
-    private List<ImagesResponse> images;
+    private List<ImagesDto> images;
 
     private Boolean status;
     private Boolean hidden;

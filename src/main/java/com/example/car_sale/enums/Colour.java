@@ -1,7 +1,31 @@
 package com.example.car_sale.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Colour {
-    RED, BLUE, GREEN, BLACK, WHITE, SILVER, GRAY, YELLOW,
-    BROWN, ORANGE, PURPLE, BEIGE, GOLD, PINK, TURQUOISE, CYAN
+    RED("Red"),
+    BLUE("Blue"),
+    GREEN("Green"),
+    BLACK("Black"),
+    WHITE("White"),
+    SILVER("Silver"),
+    GRAY("Gray"),
+    YELLOW("Yellow"),
+    BROWN("Brown"),
+    ORANGE("Orange"),
+    PURPLE("Purple"),
+    BEIGE("Beige"),
+    GOLD("Gold"),
+    PINK("Pink"),
+    TURQUOISE("Turquoise"),
+    CYAN("Cyan");
+
+    private final String displayName;
+
+    Colour(String displayName) {
+        this.displayName = displayName;
+    }
 }
+
 
