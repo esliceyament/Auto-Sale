@@ -128,6 +128,43 @@ public class SiteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(imageDtos);
     }
 
+    @GetMapping("/search/v2")
+    public PageDto<CarDto> searchCarsV2(
+            @RequestParam(required = false) String make,
+            @RequestParam(required = false) String model,
+            @RequestParam(required = false) Integer startYear,
+            @RequestParam(required = false) Integer lastYear,
+            @RequestParam(required = false) Ban ban,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Colour colour,
+            @RequestParam(required = false) Double minOdometer,
+            @RequestParam(required = false) Double maxOdometer,
+            @RequestParam(required = false) Integer minEngineType,
+            @RequestParam(required = false) Integer maxEngineType,
+            @RequestParam(required = false) FuelType fuelType,
+            @RequestParam(required = false) City city,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        CarSearchCriteria criteria = new CarSearchCriteria();
+        criteria.setMake(make);
+        criteria.setModel(model);
+        criteria.setStartYear(startYear);
+        criteria.setLastYear(lastYear);
+        criteria.setBan(ban);
+        criteria.setMinPrice(minPrice);
+        criteria.setMaxPrice(maxPrice);
+        criteria.setColour(colour);
+        criteria.setMinOdometer(minOdometer);
+        criteria.setMaxOdometer(maxOdometer);
+        criteria.setMinEngineType(minEngineType);
+        criteria.setMaxEngineType(maxEngineType);
+        criteria.setFuelType(fuelType);
+        criteria.setCity(city);
+
+        return siteService.getCarsSearchV2(criteria, page, size);
+    }
 }
 
 

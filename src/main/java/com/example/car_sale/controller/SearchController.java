@@ -7,16 +7,20 @@ import com.example.car_sale.enums.Ban;
 import com.example.car_sale.enums.City;
 import com.example.car_sale.enums.Colour;
 import com.example.car_sale.enums.FuelType;
+import com.example.car_sale.payload.*;
+import com.example.car_sale.response.AuthenticationResponse;
 import com.example.car_sale.response.CarDetailResponse;
-import com.example.car_sale.service.SearchService;
-import com.example.car_sale.service.SiteService;
+import com.example.car_sale.service.*;
+import com.example.car_sale.validation.ValidVin;
+import com.example.car_sale.validation.YearLimit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +31,9 @@ import java.util.List;
 public class SearchController {
     private final SiteService siteService;
     private final SearchService searchService;
+    private final CarService carService;
+    private final AuthenticationService authenticationService;
+    private final ImagesService imagesService;
 
     @GetMapping("/{carId}")
     public String getCarDetails(@PathVariable Long carId, Model model) throws IOException {
@@ -73,7 +80,7 @@ public class SearchController {
 
         PageDto<CarDto> result = searchService.getCarsSearch(criteria, page, size);
 
-        model1.addAttribute("cars", result.getContent()); // Ensure you pass the list of CarDto
+        model1.addAttribute("cars", result.getContent());
         model1.addAttribute("fuelTypes", FuelType.values());
         model1.addAttribute("cities", City.values());
         model1.addAttribute("colours", Colour.values());
@@ -85,4 +92,96 @@ public class SearchController {
         return "car-list";
     }
 
+    @GetMapping("/new/auto")
+    public String showAddCarForm(Model model) {
+        model.addAttribute("carPayload", new CarPayload());
+        model.addAttribute("fuelTypes", FuelType.values());
+        model.addAttribute("cities", City.values());
+        model.addAttribute("colours", Colour.values());
+        model.addAttribute("bans", Ban.values());
+        return "add-car";
+    }
+
+    @PostMapping(value = "/new/auto", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public String addCar(
+            @RequestParam("make") String make,
+            @RequestParam("model") String model,
+            @RequestParam("year") @YearLimit Integer year,
+            @RequestParam("ban") Ban ban,
+            @RequestParam("vin") @ValidVin String vin,
+            @RequestParam("price") Double price,
+            @RequestParam(value = "colour", required = false) Colour colour,
+            @RequestParam(value = "odometer", required = false) Double odometer,
+            @RequestParam(value = "engineType", required = false) Integer engineType,
+            @RequestParam(value = "fuelType", required = false) FuelType fuelType,
+            @RequestParam(value = "city", required = false) City city,
+            @RequestParam(value = "hidden", required = false) Boolean hidden,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            Model model1) {
+
+        // Create a CarFilterPayload object
+        CarFilterPayload carFilterPayload = new CarFilterPayload();
+        carFilterPayload.setColour(colour);
+        carFilterPayload.setOdometer(odometer);
+        carFilterPayload.setEngineType(engineType);
+        carFilterPayload.setFuelType(fuelType);
+        carFilterPayload.setCity(city);
+
+        // Create a CarPayload object and set its properties
+        CarPayload carPayload = new CarPayload();
+        carPayload.setMake(make);
+        carPayload.setModel(model);
+        carPayload.setYear(year);
+        carPayload.setBan(ban);
+        carPayload.setVin(vin);
+        carPayload.setPrice(price);
+        carPayload.setFilters(carFilterPayload);
+        carPayload.setHidden(hidden);
+
+        // Add the car using the CarService
+        Long carId = carService.addCarWithID(carPayload);
+
+        // Handle image uploads
+        if (files != null && !files.isEmpty()) {
+            ImagesPayload imagesPayload = new ImagesPayload();
+            imagesPayload.setFiles(files);
+            imagesPayload.setCarId(carId); // Associate images with the car ID
+
+            imagesService.uploadImages(imagesPayload);
+        }
+
+        // Add a success message to the model
+        model1.addAttribute("message", "Car added successfully!");
+
+        // Redirect to the search page
+        return "redirect:/autos/search";
+    }
+
+
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        model.addAttribute("registerPayload", new RegisterPayload());
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String register(@ModelAttribute RegisterPayload payload, Model model) {
+        authenticationService.register(payload);
+        model.addAttribute("message", "Registration successful!");
+        return "redirect:/autos/search";
+    }
+
+    @GetMapping("/authenticate")
+    public String showAuthenticateForm(Model model) {
+        model.addAttribute("authenticationPayload", new AuthenticationPayload());
+        return "authenticate";
+    }
+
+    @PostMapping("/authenticate")
+    public String authenticate(@ModelAttribute AuthenticationPayload payload, Model model) {
+        authenticationService.authenticate(payload);
+        model.addAttribute("message", "Authentication successful!");
+        return "redirect:/autos/search";
+    }
 }
+

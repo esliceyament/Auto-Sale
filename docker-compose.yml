@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "9462"
+      MYSQL_DATABASE: cartest
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - spring_boot_network
+
+  springbootapp:
+    image: my_spring_boot_app
+    container_name: springboot_container
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cartest
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "9462"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      IMAGE_UPLOAD_DIR: /path/to/upload/directory
+      MY_SECRET_KEY: 75c89af1a4f16d2ef77cdaabaa140c6da434d0c6d1279c41ee972140a277ff02
+    ports:
+      - "8080:8080"
+    networks:
+      - spring_boot_network
+
+volumes:
+  mysql-data:
+
+networks:
+  spring_boot_network:
+    driver: bridge

@@ -124,36 +124,25 @@ public class CarService {
         }
     }
 
-
-
-
-
-
-
-//    public CarDetailResponse getCarDetails(Long carId) throws IOException {
-//        Car car = carRepository.findById(carId)
-//                .orElseThrow(() -> new NotFoundException("Car not found"));
-//
-//        List<Images> images = car.getImages();
-//        List<String> base64Images = new ArrayList<>();
-//
-//        for (Images image : images) {
-//            Path path = Paths.get(image.getFilePath());
-//            byte[] fileContent = Files.readAllBytes(path);
-//            String base64Image = Base64.getEncoder().encodeToString(fileContent);
-//            base64Images.add(base64Image);
-//        }
-//
-//        CarDto carDto = carMapper.toDto(car);
-//        return new CarDetailResponse(carDto, base64Images);
-//    }
-
     public CarDetailResponse getCarDetails(Long carId) throws IOException {
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new NotFoundException("Car with ID " + carId + " not found"));
 
         CarDto carDto = carMapper.toDto(car); // Ensure this method correctly maps your Car entity to CarDto
         return new CarDetailResponse(carDto, Collections.emptyList()); // No images
+    }
+
+
+
+    public Long addCarWithID(CarPayload carPayload) {
+        // Convert CarPayload to Car entity
+        Car car = carMapper.toEntity(carPayload);
+
+        // Save the car to the repository
+        Car savedCar = carRepository.save(car);
+
+        // Return the ID of the newly created car
+        return savedCar.getId();
     }
 
 }
